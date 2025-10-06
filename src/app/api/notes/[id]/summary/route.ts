@@ -1,13 +1,11 @@
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getNote, updateNote } from "@/lib/noteService";
 import { generateSummaryForNote } from "@/lib/summary";
 
-interface RouteParams {
-  params: { id: string };
-}
-
-export async function POST(_: Request, { params }: RouteParams) {
+export async function POST(_: NextRequest, context: unknown) {
+  const { params } = context as { params: { id: string } };
   const note = await getNote(params.id);
 
   if (!note) {

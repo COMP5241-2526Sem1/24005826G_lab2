@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## SkyNotes – Cloud-native notetaking
 
-## Getting Started
+This project refactors the original SQLite-powered notetaking lab into a fully serverless-ready Next.js 15 application. Data is stored in Postgres via Prisma, using the Neon serverless driver when deployed on Vercel (or any Neon-hosted database), and the standard Postgres driver for local development.
 
-First, run the development server:
+### Features
+
+- ✅ CRUD notetaking interface with optimistic client UX
+- ✅ AI-powered summaries backed by any OpenAI-compatible API (optional)
+- ✅ Prisma data access layer with serverless-ready connection handling
+- ✅ Automated smoke test to verify database connectivity
+
+---
+
+## Prerequisites
+
+- Node.js 20+
+- Docker (for local Postgres via `docker compose`)
+- A Postgres database (Neon, Supabase, etc.)
+- Optional: OpenAI API key for AI summaries
+
+---
+
+## Local setup
+
+1. Copy the example environment file and fill in credentials:
+
+	```bash
+	cp .env.example .env.local
+	```
+
+	- `DATABASE_URL`: use your Postgres connection string (`?sslmode=require` recommended for cloud DBs). For the provided Docker setup, use `postgresql://vercel:vercel@127.0.0.1:54322/vercel_notes`.
+	- `OPENAI_API_KEY` (optional): enables AI summaries.
+
+2. Start Postgres locally (skip if using an external database):
+
+	```bash
+	docker compose up -d
+	```
+
+3. Sync the schema and seed starter notes:
+
+	```bash
+	npm run db:push
+	npm run db:seed
+	```
+
+4. Launch the development server:
+
+	```bash
+	npm run dev
+	```
+
+	Visit [http://localhost:3000](http://localhost:3000) to use the app.
+
+---
+
+## Testing the database connection
+
+With the database running and `DATABASE_URL` exported, run:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm test
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This creates a note, reads it back, and then deletes it to confirm everything works end-to-end.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deploying to Vercel
 
-## Learn More
+1. Create a new project in Vercel and import this repository.
+2. In **Environment Variables**, add at least:
+	- `DATABASE_URL` – use your managed Postgres (Neon/Supabase/PlanetScale with pg rollup) connection string.
+	- `OPENAI_API_KEY` – optional but recommended for summaries.
+3. Trigger a deploy. The app uses the `standalone` Next.js output and serverless-friendly Prisma configuration, so no extra build settings are required.
+4. After deploying, run `npm test` locally against the same database or create a manual note in production to ensure persistence.
 
-To learn more about Next.js, take a look at the following resources:
+> Tip: Neon provides a free serverless Postgres tier that works out-of-the-box with this project.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Useful scripts
 
-## Deploy on Vercel
+| Script           | Description                                              |
+| ---------------- | -------------------------------------------------------- |
+| `npm run dev`    | Start Next.js locally.                                   |
+| `npm run build`  | Create a production build (used by Vercel).              |
+| `npm run start`  | Start the production server.                             |
+| `npm run lint`   | Run ESLint checks.                                       |
+| `npm run db:push`| Push Prisma schema to the configured database.           |
+| `npm run db:seed`| Seed starter notes (idempotent if entries already exist).|
+| `npm test`       | Smoke test verifying CRUD operations against Postgres.   |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Troubleshooting
+
+- **`DATABASE_URL` missing during build** – ensure it is provided in `.env.local` for local builds and in Vercel environment variables for cloud builds.
+- **Connection refused locally** – confirm Docker is running and `docker compose ps` shows the Postgres service healthy. The provided compose file maps port `54322` to avoid conflicts with an existing Postgres installation.
+- **AI summaries disabled** – you'll see a fallback message until `OPENAI_API_KEY` is set.
+
+Happy shipping! 🚀

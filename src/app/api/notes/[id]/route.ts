@@ -1,3 +1,4 @@
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import {
@@ -7,11 +8,8 @@ import {
   updateNote,
 } from "@/lib/noteService";
 
-interface RouteParams {
-  params: { id: string };
-}
-
-export async function GET(_: Request, { params }: RouteParams) {
+export async function GET(_: NextRequest, context: unknown) {
+  const { params } = context as { params: { id: string } };
   const note = await getNote(params.id);
   if (!note) {
     return NextResponse.json({ message: "Note not found" }, { status: 404 });
@@ -20,7 +18,8 @@ export async function GET(_: Request, { params }: RouteParams) {
   return NextResponse.json(note);
 }
 
-export async function PATCH(request: Request, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, context: unknown) {
+  const { params } = context as { params: { id: string } };
   try {
     const payload = await request.json();
     const parsed = noteUpdateSchema.parse(payload);
@@ -41,7 +40,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(_: Request, { params }: RouteParams) {
+export async function DELETE(_: NextRequest, context: unknown) {
+  const { params } = context as { params: { id: string } };
   try {
     await deleteNote(params.id);
     return NextResponse.json({ success: true });
