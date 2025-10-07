@@ -5,9 +5,18 @@ This project refactors the original SQLite-powered notetaking lab into a fully s
 ### Features
 
 - ✅ CRUD notetaking interface with optimistic client UX
+- ✅ Polished dashboard with live search, filter chips, keyboard shortcuts, and toast feedback
 - ✅ AI-powered summaries backed by any OpenAI-compatible API (optional)
 - ✅ Prisma data access layer with serverless-ready connection handling
 - ✅ Automated smoke test to verify database connectivity
+
+### UX highlights
+
+- Friendly hero layout with glassmorphism card showcasing usage tips.
+- Gradient background and subtle depth to keep focus on content.
+- Keyboard shortcut (`⌘/Ctrl + Enter`) for rapid note creation.
+- AI summary badge states (“updated” vs “pending”) with aria-live updates for assistive tech.
+- Toast notifications for create/update/delete actions so you always know what happened.
 
 ---
 

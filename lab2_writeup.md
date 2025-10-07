@@ -27,7 +27,8 @@ SkyNotes is a serverless-ready notetaking app built with Next.js 15, Prisma, and
 
 ### 4. Frontend experience
 - Replaced the default landing page with a responsive dashboard (`<NoteBoard />`) offering note creation, editing, deletion, and AI summarisation.
-- Implemented optimistic UI feedback (loading states, disable buttons) for better UX in serverless latency scenarios.
+- Added live search, filter chips, keyboard shortcuts (⌘/Ctrl + Enter), and toast notifications for immediate feedback.
+- Implemented optimistic UI feedback (loading states, disable buttons) and aria-live announcements for better UX in serverless latency scenarios.
 - ✅ _Screenshot placeholder_: `![Frontend UI](./docs/screenshots/step4.png)`
 
 ### 5. Deployment readiness
@@ -38,8 +39,8 @@ SkyNotes is a serverless-ready notetaking app built with Next.js 15, Prisma, and
 
 ### 6. Optional enhancements
 - AI summary endpoint gracefully degrades when no API key is provided, showing a helpful message instead of failing.
-- Tagged notes provide lightweight categorisation that can be filtered or searched in future iterations.
-- Documented troubleshooting tips and common pitfalls in the README.
+- Tagged notes now support search and quick filters directly in the UI, backed by accessible aria-live summary badges.
+- Documented troubleshooting tips, new UX affordances, and common pitfalls in the README.
 
 ## Challenges and lessons learned
 - **Database connectivity in serverless contexts**: Prisma requires specialised drivers (e.g. Neon) for edge/serverless deployments because standard connection pooling is unavailable. Detecting the database host allows the same code to run locally and in production.
