@@ -109,3 +109,23 @@ This creates a note, reads it back, and then deletes it to confirm everything wo
 - **AI summaries disabled** – you'll see a fallback message until `OPENAI_API_KEY` is set.
 
 Happy shipping! 🚀
+
+---
+
+## Vercel: Make the project publicly accessible (disable Vercel Authentication)
+
+If you want the deployed site to be accessible publicly (without requiring a Vercel team member to sign in), disable the "Vercel Authentication" option under Deployment Protection in your Vercel Project Settings. This repository's CI/builds and runtime will continue to work as normal; this just removes the requirement that visitors be authenticated in your Vercel team.
+
+Quick steps (UI):
+
+1. Sign in to https://vercel.com and open the project you deployed from this repo.
+2. Click "Settings" in the project sidebar.
+3. Find the "Deployment Protection" section (it may be under the "General" tab or a similarly-named settings group).
+4. Locate the "Vercel Authentication" toggle and switch it to "Off" (disabled).
+5. Save changes if required. Trigger a new deployment (or re-deploy the latest) to ensure the updated setting is applied to the active deployment.
+
+Important notes:
+
+- Disabling Vercel Authentication allows anyone on the public internet to view the site. Keep environment variables (like `DATABASE_URL` and `OPENAI_API_KEY`) secret — they are not exposed to clients when configured correctly in Vercel's Environment Variables UI.
+- If you later need to restrict access again, re-enable the toggle in the same settings area.
+- For screenshots and a step-by-step walkthrough, see `docs/vercel-disable-auth.md`.
