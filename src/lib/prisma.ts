@@ -56,15 +56,16 @@ function initPrisma() {
 export const prisma = new Proxy(
   {},
   {
-    get(_, prop) {
-      // initialize on first property access
-      const client = initPrisma();
-      // @ts-ignore - forward access to the real client
-      return (client as any)[prop];
-    },
-    apply(_, thisArg, args) {
-      const client = initPrisma();
-      return (client as any).apply(thisArg, args);
-    },
+      get(_target: unknown, prop: PropertyKey) {
+        // initialize on first property access
+        const client = initPrisma();
+    return (client as unknown as Record<PropertyKey, unknown>)[prop];
+      },
+      apply(_target: unknown, thisArg: unknown, args: unknown[]) {
+        const client = initPrisma();
+        // PrismaClient is callable in some edge cases; forward apply if present
+        const fn = (client as unknown as unknown) as Function;
+        return fn.apply(thisArg, args);
+      },
   }
 ) as unknown as PrismaClient;
