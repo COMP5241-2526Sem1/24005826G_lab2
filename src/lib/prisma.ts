@@ -13,6 +13,11 @@ let prismaClient = globalForPrisma.prisma;
 
 function createPrismaClient(): PrismaClient {
   const { DATABASE_URL } = getEnv();
+  if (!DATABASE_URL) {
+    throw new Error(
+      "DATABASE_URL is required to initialize the Prisma client at runtime"
+    );
+  }
   const parsedUrl = new URL(DATABASE_URL);
   const hostname = parsedUrl.hostname.toLowerCase();
   const shouldUseNeonAdapter =
