@@ -61,11 +61,8 @@ export const prisma = new Proxy(
         const client = initPrisma();
     return (client as unknown as Record<PropertyKey, unknown>)[prop];
       },
-      apply(_target: unknown, thisArg: unknown, args: unknown[]) {
-        const client = initPrisma();
-        // PrismaClient is callable in some edge cases; forward apply if present
-        const fn = (client as unknown as unknown) as Function;
-        return fn.apply(thisArg, args);
-      },
+      // No apply trap: PrismaClient is not expected to be callable. Keeping the
+      // proxy minimal avoids needing the `Function` type which is disallowed
+      // by eslint rules.
   }
 ) as unknown as PrismaClient;
