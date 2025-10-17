@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabase-client";
 
 interface Note {
   id: string;

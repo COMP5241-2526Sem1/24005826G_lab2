@@ -26,7 +26,23 @@ export async function exampleClientSideAuth() {
 }
 
 // Example 2: Real-time subscriptions (client-side)
-export function subscribeToNoteChanges(callback: (payload: any) => void) {
+interface NotePayload {
+  new: {
+    id: string;
+    content: string;
+    created_at: string;
+    [key: string]: unknown;
+  };
+  old?: {
+    id: string;
+    content: string;
+    created_at: string;
+    [key: string]: unknown;
+  };
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+}
+
+export function subscribeToNoteChanges(callback: (payload: NotePayload) => void) {
   if (!supabase) {
     console.warn("Supabase client not configured");
     return null;
