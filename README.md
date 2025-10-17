@@ -118,6 +118,22 @@ Environment variable:
 
 ---
 
+## (Optional) Using the Supabase JS Client
+
+Prisma handles database access via `DATABASE_URL` to Supabase Postgres. If you also need Supabase features (Auth, Storage, Realtime), initialize the Supabase client safely:
+
+- Server-only admin (never import in client):
+	- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+	- See `src/lib/supabase-server.ts`
+
+- Client/browser usage:
+	- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+	- See `src/lib/supabase-client.ts`
+
+Do not expose the service role key to the client.
+
+---
+
 ## Useful scripts
 
 | Script           | Description                                              |
