@@ -9,6 +9,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: vercel_notes
+          POSTGRES_USER: vercel
+          POSTGRES_PASSWORD: vercel
+        ports:
+          - 54322:5432
+        options: >-
+          --health-cmd "pg_isready -U vercel -d vercel_notes" 
+          --health-interval 5s 
+          --health-timeout 5s 
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,17 +38,30 @@ jobs:
       - name: Run build (with temporary DATABASE_URL)
         env:
           # A placeholder Postgres URL so build-time env validation passes.
-          # This host is not expected to be reachable; the build should not
-          # attempt to connect to the DB during static analysis. If your
-          # project needs DB connectivity for tests, add a service or use
-          # a hosted test DB and store its URL in the repository secrets.
+          # Build shouldn't require connectivity; runtime checks guard usage.
           DATABASE_URL: postgresql://vercel:vercel@127.0.0.1:54322/vercel_notes
         run: npm run build
 
-      - name: Run tests (skip DB smoke tests)
-        # The repository includes a `npm test` script which runs a DB smoke
-        # test. We skip that here by default because it requires a running
-        # Postgres instance. If you'd like CI to run DB tests, set up a
-        # service container or provide a test DB URL in secrets and update
-        # this step.
-        run: echo "Skipping DB smoke tests in CI by default"
+      - name: Wait for database
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 54322 -U vercel -d vercel_notes && exit 0
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+          echo "Postgres did not become ready in time" && exit 1
+
+      - name: Push schema
+        env:
+          DATABASE_URL: postgresql://vercel:vercel@127.0.0.1:54322/vercel_notes
+        run: npm run db:push
+
+      - name: Seed database
+        env:
+          DATABASE_URL: postgresql://vercel:vercel@127.0.0.1:54322/vercel_notes
+        run: npm run db:seed
+
+      - name: Run DB smoke test
+        env:
+          DATABASE_URL: postgresql://vercel:vercel@127.0.0.1:54322/vercel_notes
+        run: npm test
