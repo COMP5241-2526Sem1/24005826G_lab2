@@ -3,8 +3,18 @@ import { NextResponse } from "next/server";
 import { createNote, listNotes, noteInputSchema } from "@/lib/noteService";
 
 export async function GET() {
-  const notes = await listNotes();
-  return NextResponse.json({ notes });
+  try {
+    const notes = await listNotes();
+    return NextResponse.json({ notes });
+  } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json({ message: error.message }, { status: 500 });
+    }
+    return NextResponse.json(
+      { message: "Unable to load notes" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {

@@ -52,8 +52,19 @@ export function NoteBoard() {
     try {
       const response = await fetch("/api/notes", { cache: "no-store" });
       if (!response.ok) {
-        const payload = (await response.json()) as { message?: string };
-        throw new Error(payload.message ?? "Unable to load notes");
+        let message: string | undefined;
+        try {
+          const payload = (await response.json()) as { message?: string };
+          message = payload?.message;
+        } catch {
+          try {
+            const text = await response.text();
+            message = text || undefined;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(message ?? "Unable to load notes");
       }
       const data = (await response.json()) as { notes: Note[] };
       setNotes(
@@ -124,8 +135,19 @@ export function NoteBoard() {
       });
 
       if (!response.ok) {
-        const payload = (await response.json()) as { message?: string };
-        throw new Error(payload.message ?? "Unable to create note");
+        let message: string | undefined;
+        try {
+          const payload = (await response.json()) as { message?: string };
+          message = payload?.message;
+        } catch {
+          try {
+            const text = await response.text();
+            message = text || undefined;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(message ?? "Unable to create note");
       }
 
       const created = (await response.json()) as Note;
@@ -163,8 +185,19 @@ export function NoteBoard() {
       });
 
       if (!response.ok) {
-        const payload = (await response.json()) as { message?: string };
-        throw new Error(payload.message ?? "Unable to update note");
+        let message: string | undefined;
+        try {
+          const payload = (await response.json()) as { message?: string };
+          message = payload?.message;
+        } catch {
+          try {
+            const text = await response.text();
+            message = text || undefined;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(message ?? "Unable to update note");
       }
 
       const updated = (await response.json()) as Note;
@@ -200,8 +233,19 @@ export function NoteBoard() {
     try {
       const response = await fetch(`/api/notes/${id}`, { method: "DELETE" });
       if (!response.ok) {
-        const payload = (await response.json()) as { message?: string };
-        throw new Error(payload.message ?? "Unable to delete note");
+        let message: string | undefined;
+        try {
+          const payload = (await response.json()) as { message?: string };
+          message = payload?.message;
+        } catch {
+          try {
+            const text = await response.text();
+            message = text || undefined;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(message ?? "Unable to delete note");
       }
 
       setNotes((current) => current.filter((note) => note.id !== id));
@@ -223,8 +267,19 @@ export function NoteBoard() {
       });
 
       if (!response.ok) {
-        const payload = (await response.json()) as { message?: string };
-        throw new Error(payload.message ?? "Unable to generate summary");
+        let message: string | undefined;
+        try {
+          const payload = (await response.json()) as { message?: string };
+          message = payload?.message;
+        } catch {
+          try {
+            const text = await response.text();
+            message = text || undefined;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(message ?? "Unable to generate summary");
       }
 
       const data = (await response.json()) as {
@@ -266,8 +321,19 @@ export function NoteBoard() {
         body: JSON.stringify({ target, saveAsNew }),
       });
       if (!response.ok) {
-        const payload = (await response.json()) as { message?: string };
-        throw new Error(payload.message ?? "Unable to translate note");
+        let message: string | undefined;
+        try {
+          const payload = (await response.json()) as { message?: string };
+          message = payload?.message;
+        } catch {
+          try {
+            const text = await response.text();
+            message = text || undefined;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(message ?? "Unable to translate note");
       }
       const data = (await response.json()) as { note: Note; source: string };
       setNotes((current) => {
@@ -296,8 +362,19 @@ export function NoteBoard() {
         body: JSON.stringify({ prompt: generatorPrompt }),
       });
       if (!response.ok) {
-        const payload = (await response.json()) as { message?: string };
-        throw new Error(payload.message ?? "Unable to generate note");
+        let message: string | undefined;
+        try {
+          const payload = (await response.json()) as { message?: string };
+          message = payload?.message;
+        } catch {
+          try {
+            const text = await response.text();
+            message = text || undefined;
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(message ?? "Unable to generate note");
       }
       const data = (await response.json()) as { note: Note; source: string };
       setNotes((current) => [data.note, ...current]);
