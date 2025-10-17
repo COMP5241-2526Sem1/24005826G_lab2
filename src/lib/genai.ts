@@ -68,7 +68,7 @@ export async function translateContent(
       throw new Error("Missing fields in translation result");
     }
     return { title: parsed.title, content: parsed.content, source: "openai" };
-  } catch (e) {
+  } catch (_err) {
     throw new Error("Failed to parse translation output from OpenAI.");
   }
 }
@@ -123,7 +123,7 @@ export async function generateNoteFromPrompt(prompt: string): Promise<GeneratedN
       throw new Error("Missing fields in generation result");
     }
     return { title: parsed.title, content: parsed.content, source: "openai" };
-  } catch (e) {
+  } catch (_err) {
     throw new Error("Failed to parse generation output from OpenAI.");
   }
 }
