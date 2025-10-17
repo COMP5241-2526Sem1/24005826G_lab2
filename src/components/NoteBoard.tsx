@@ -39,9 +39,11 @@ export function NoteBoard() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [summarizingId, setSummarizingId] = useState<string | null>(null);
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<(typeof filters)[keyof typeof filters]>(filters.ALL);
   const [showToast, setShowToast] = useState<string | null>(null);
+  const [generatorPrompt, setGeneratorPrompt] = useState("");
 
   const fetchNotes = async () => {
     setLoading(true);
@@ -254,6 +256,60 @@ export function NoteBoard() {
     }
   };
 
+  const handleTranslate = async (id: string, target: string, saveAsNew: boolean) => {
+    setTranslatingId(id);
+    setError(null);
+    try {
+      const response = await fetch(`/api/notes/${id}/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target, saveAsNew }),
+      });
+      if (!response.ok) {
+        const payload = (await response.json()) as { message?: string };
+        throw new Error(payload.message ?? "Unable to translate note");
+      }
+      const data = (await response.json()) as { note: Note; source: string };
+      setNotes((current) => {
+        const exists = current.some((n) => n.id === data.note.id);
+        if (exists) {
+          return current.map((n) => (n.id === id ? { ...n, ...data.note } : n));
+        }
+        return [data.note, ...current];
+      });
+      setShowToast(data.source === "openai" ? "Translated" : "Translation unavailable");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to translate note");
+    } finally {
+      setTranslatingId(null);
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (!generatorPrompt.trim()) return;
+    setCreating(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/notes/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: generatorPrompt }),
+      });
+      if (!response.ok) {
+        const payload = (await response.json()) as { message?: string };
+        throw new Error(payload.message ?? "Unable to generate note");
+      }
+      const data = (await response.json()) as { note: Note; source: string };
+      setNotes((current) => [data.note, ...current]);
+      setShowToast(data.source === "openai" ? "AI note created" : "AI disabled — demo note added");
+      setGeneratorPrompt("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to generate note");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {showToast && (
@@ -364,6 +420,24 @@ export function NoteBoard() {
             >
               {creating ? "Saving…" : "Save note"}
             </button>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="AI: generate note from prompt"
+                className="w-64 rounded-xl border border-neutral-200 bg-white/90 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-white/10 dark:bg-white/5"
+                value={generatorPrompt}
+                onChange={(e) => setGeneratorPrompt(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={handleGenerate}
+                className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white/70 px-3 py-1.5 text-sm font-medium text-neutral-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-white/90 dark:border-white/10 dark:bg-white/10 dark:text-neutral-200"
+                disabled={creating}
+                aria-label="Generate note with AI"
+              >
+                ✨ Generate
+              </button>
+            </div>
             {error && (
               <span className="text-sm text-red-600" role="alert">
                 {error}
@@ -538,6 +612,35 @@ export function NoteBoard() {
                         ? "Asking OpenAI…"
                         : "Generate AI summary"}
                     </button>
+
+                    <div className="flex items-center gap-2">
+                      <label htmlFor={`lang-${note.id}`} className="text-xs text-neutral-500 dark:text-neutral-300">
+                        Translate to
+                      </label>
+                      <select
+                        className="rounded-lg border border-neutral-200 bg-white/70 px-2 py-1 text-xs dark:border-white/10 dark:bg-white/10"
+                        aria-label="Select translation target"
+                        defaultValue="zh"
+                        id={`lang-${note.id}`}
+                      >
+                        <option value="zh">Chinese</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="es">Spanish</option>
+                        <option value="ja">Japanese</option>
+                      </select>
+                      <button
+                        className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white/70 px-3 py-1.5 text-xs font-medium text-neutral-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-white/90 dark:border-white/10 dark:bg-white/10 dark:text-neutral-200"
+                        onClick={() => {
+                          const select = document.getElementById(`lang-${note.id}`) as HTMLSelectElement | null;
+                          const value = select?.value ?? "zh";
+                          void handleTranslate(note.id, value, true);
+                        }}
+                        disabled={translatingId === note.id}
+                      >
+                        {translatingId === note.id ? "Translating…" : "Translate (new)"}
+                      </button>
+                    </div>
 
                     {isEditing && (
                       <form
