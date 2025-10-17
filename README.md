@@ -88,6 +88,36 @@ This creates a note, reads it back, and then deletes it to confirm everything wo
 
 ---
 
+## Using Supabase (Postgres)
+
+You can run this project entirely on Supabase Postgres. Steps:
+
+1. Create a project in Supabase → copy the connection string from Settings → Database → Connection string.
+	- Prefer the pooled connection string when available.
+	- Ensure `?sslmode=require` is present for secure connections.
+2. Set `DATABASE_URL` to that connection string in your local `.env.local` and in Vercel (Production & Preview environments).
+3. Apply the schema and seed data against Supabase:
+	- `npm run db:push`
+	- `npm run db:seed`
+
+That’s it — Prisma is already configured for PostgreSQL.
+
+---
+
+## GenAI features
+
+This app can use any OpenAI-compatible API key to power:
+
+- AI summaries (existing): click “Generate AI summary” on a note.
+- Translate note: POST `/api/notes/[id]/translate` with `{ target: "fr", saveAsNew: true }` or use the UI control per note.
+- Generate note from prompt: POST `/api/notes/generate` with `{ prompt: "..." }` or use the input next to “Save note”.
+
+Environment variable:
+
+- `OPENAI_API_KEY` (optional) — when omitted, the app degrades gracefully with clear messages.
+
+---
+
 ## Useful scripts
 
 | Script           | Description                                              |
