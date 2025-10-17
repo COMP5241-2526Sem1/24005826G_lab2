@@ -20,6 +20,20 @@ function createPrismaClient(): PrismaClient {
   }
   const parsedUrl = new URL(DATABASE_URL);
   const hostname = parsedUrl.hostname.toLowerCase();
+  // Supabase guidance: ensure sslmode=require and consider pooled port 6543
+  if (hostname.includes("supabase.co")) {
+    const hasSsl = parsedUrl.searchParams.get("sslmode");
+    if (!hasSsl) {
+      console.warn(
+        "Supabase connection detected: it's recommended to use '?sslmode=require' in DATABASE_URL."
+      );
+    }
+    if (parsedUrl.port && parsedUrl.port !== "6543" && parsedUrl.port !== "5432") {
+      console.warn(
+        `Supabase connection on port ${parsedUrl.port}. For serverless environments, consider the pooled port 6543.`
+      );
+    }
+  }
   const shouldUseNeonAdapter =
     process.env.PRISMA_FORCE_NEON === "true" || hostname.includes("neon.tech");
 
